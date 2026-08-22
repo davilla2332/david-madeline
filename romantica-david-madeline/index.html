@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#8f4660">
+  <meta name="description" content="Nuestra historia: David y Madeline.">
+  <meta property="og:title" content="David & Madeline — Nuestra historia">
+  <meta property="og:description" content="Un pequeño lugar para guardar nuestros recuerdos, fechas y promesas.">
+  <title>David & Madeline ❤️</title>
+  <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <canvas id="heartsCanvas" aria-hidden="true"></canvas>
+
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="Ir al inicio">
+      <span class="brand-mark">D<span>♥</span>M</span>
+      <span class="brand-copy">David & Madeline</span>
+    </a>
+    <div class="topbar-actions">
+      <button id="musicToggle" class="icon-button" type="button" aria-pressed="false" aria-label="Reproducir música" title="Música">
+        <span aria-hidden="true">♫</span>
+      </button>
+      <button id="themeToggle" class="icon-button" type="button" aria-pressed="false" aria-label="Cambiar tema" title="Cambiar tema">
+        <span aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero section" id="inicio">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">Nuestra historia empezó con una conversación</p>
+        <h1>Hay personas que llegan por casualidad… y se sienten como destino.</h1>
+        <p class="hero-lead">Este rincón es para nosotros: para recordar cómo empezó, guardar lo que venga y nunca olvidar lo bonito de encontrarnos.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#propuesta">Tengo algo que preguntarte</a>
+          <a class="button button-ghost" href="#historia">Ver nuestra historia</a>
+        </div>
+        <div class="mini-note"><span>12 JUL</span> empezamos a hablar · <span>16 AGO</span> nos conocimos</div>
+      </div>
+
+      <div class="hero-card reveal" aria-label="Tarjeta romántica">
+        <div class="hero-card-inner">
+          <div class="floating-heart">♥</div>
+          <p class="script-line">Para Madeline</p>
+          <p class="hero-quote">“Desde que apareciste, los días normales empezaron a tener algo especial.”</p>
+          <div class="signature">— David</div>
+          <div class="date-chip">12.07.2026 → ∞</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section proposal" id="propuesta">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Una pregunta importante</p>
+        <h2>¿Quieres seguir escribiendo esta historia conmigo?</h2>
+        <p>No importa cuántas páginas falten. Solo quiero que las próximas también tengan tu nombre.</p>
+      </div>
+
+      <div class="proposal-stage reveal" id="proposalStage">
+        <button class="button button-yes" id="yesButton" type="button">Sí, quiero ❤️</button>
+        <button class="button button-no" id="noButton" type="button">No 😢</button>
+        <p class="proposal-hint" id="proposalHint" aria-live="polite">Piénsalo bien… el botón de “No” es un poco tímido 😌</p>
+      </div>
+    </section>
+
+    <section class="section story" id="historia">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Capítulo 01</p>
+        <h2>Dos fechas que cambiaron el rumbo</h2>
+        <p>No hacen falta cien años para que algo se sienta importante. A veces bastan un mensaje, una coincidencia y el momento correcto.</p>
+      </div>
+
+      <div class="timeline">
+        <article class="timeline-card reveal">
+          <div class="timeline-date"><span>12</span> JULIO 2026</div>
+          <div>
+            <h3>Empezamos a hablar</h3>
+            <p>Una conversación que parecía pequeña terminó convirtiéndose en el comienzo de algo que valía la pena guardar.</p>
+          </div>
+        </article>
+        <div class="timeline-line" aria-hidden="true"><span></span></div>
+        <article class="timeline-card reveal">
+          <div class="timeline-date"><span>16</span> AGOSTO 2026</div>
+          <div>
+            <h3>Por fin nos conocimos</h3>
+            <p>Ese día los mensajes tuvieron voz, las palabras tuvieron mirada y la historia dejó de sentirse lejana.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section counter-section">
+      <div class="counter-shell reveal">
+        <div>
+          <p class="eyebrow">Desde aquel primer “hola”</p>
+          <h2>El tiempo también cuenta nuestra historia</h2>
+          <p class="counter-intro">No mide todo lo que hemos sentido, pero sí nos recuerda cuánto ha pasado desde que comenzamos a hablar.</p>
+        </div>
+        <div class="counter" id="relationshipCounter" aria-live="polite">
+          <div><strong id="daysCount">0</strong><span>días</span></div>
+          <div><strong id="hoursCount">0</strong><span>horas</span></div>
+          <div><strong id="minutesCount">0</strong><span>minutos</span></div>
+          <div><strong id="secondsCount">0</strong><span>segundos</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reasons" id="razones">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Pequeñas cosas, gran diferencia</p>
+        <h2>Razones por las que me alegra haberte encontrado</h2>
+      </div>
+      <div class="reason-grid">
+        <article class="reason-card reveal"><span>01</span><h3>Tu forma de ser</h3><p>Porque contigo las conversaciones se sienten fáciles, sinceras y especiales.</p></article>
+        <article class="reason-card reveal"><span>02</span><h3>Tu presencia</h3><p>Porque hay personas que simplemente hacen que un lugar se sienta mejor cuando llegan.</p></article>
+        <article class="reason-card reveal"><span>03</span><h3>Lo que provocas en mí</h3><p>Porque me haces querer cuidar más los detalles, el tiempo y las cosas bonitas.</p></article>
+        <article class="reason-card reveal"><span>04</span><h3>Lo que todavía falta</h3><p>Porque me emociona pensar en todos los recuerdos que todavía no existen.</p></article>
+      </div>
+      <div class="random-reason reveal">
+        <p id="randomReasonText">Toca el botón y te diré una razón extra.</p>
+        <button class="button button-soft" id="randomReasonButton" type="button">Dime otra razón ✨</button>
+      </div>
+    </section>
+
+    <section class="section memory-jar-section" id="frasquitos">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Frasquito de recuerdos</p>
+        <h2>Mensajes para abrir cuando quieras sentirte cerquita</h2>
+      </div>
+      <div class="memory-jar-layout reveal">
+        <button class="jar" id="jarButton" type="button" aria-label="Sacar un mensaje del frasquito">
+          <span class="jar-lid"></span>
+          <span class="jar-glass"><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i></span>
+          <span class="jar-label">Para Madeline</span>
+        </button>
+        <div class="jar-message" id="jarMessage" aria-live="polite">
+          <p>Haz clic en el frasquito para sacar un mensaje al azar.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section open-when" id="abrir-cuando">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Abrir cuando…</p>
+        <h2>Un pequeño abrazo en forma de palabras</h2>
+      </div>
+      <div class="envelope-grid">
+        <button class="mini-envelope reveal" type="button" data-message="Si tu día estuvo pesado, recuerda que no tienes que ser fuerte todo el tiempo. Aquí tienes un lugar donde puedes descansar, hablar y simplemente ser tú."><span>✉</span><b>…tengas un día difícil</b></button>
+        <button class="mini-envelope reveal" type="button" data-message="Si me extrañas, piensa que en algún lugar yo también estoy recordando una conversación, una sonrisa o un momento contigo. La distancia nunca borra lo que importa."><span>✉</span><b>…me extrañes</b></button>
+        <button class="mini-envelope reveal" type="button" data-message="Quiero que recuerdes esto: eres más capaz de lo que a veces crees, y mereces celebrar cada paso que das, incluso los que nadie más ve."><span>✉</span><b>…dudes de ti</b></button>
+        <button class="mini-envelope reveal" type="button" data-message="Imagínanos riéndonos de alguna tontería, inventando un plan de último minuto y convirtiendo un día cualquiera en un recuerdo. Todavía nos faltan muchos de esos."><span>✉</span><b>…quieras sonreír</b></button>
+      </div>
+    </section>
+
+    <section class="section gallery-section" id="galeria">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Nuestro álbum</p>
+        <h2>Un lugar para guardar lo que no queremos olvidar</h2>
+        <p>Las primeras tarjetas son de ejemplo. Cuando conectes Supabase, las fotos que suban desde esta misma página aparecerán aquí automáticamente.</p>
+      </div>
+
+      <div class="gallery-toolbar reveal">
+        <div class="gallery-status" id="cloudStatus"><span class="status-dot"></span>Galería local activa</div>
+        <button class="button button-soft" id="openUploadButton" type="button">Subir una foto ☁️</button>
+      </div>
+
+      <div class="photo-grid" id="photoGrid">
+        <figure class="photo-card reveal">
+          <img src="assets/images/gallery/photo-1.svg" alt="Marcador de foto: nuestro primer recuerdo" loading="lazy">
+          <figcaption><strong>Nuestro primer recuerdo</strong><span>Reemplaza esta imagen o súbela desde la galería online.</span></figcaption>
+        </figure>
+        <figure class="photo-card photo-card-tall reveal">
+          <img src="assets/images/gallery/photo-2.svg" alt="Marcador de foto: un día especial" loading="lazy">
+          <figcaption><strong>Un día especial</strong><span>Aquí puede vivir una de esas fotos que siempre terminan mirando otra vez.</span></figcaption>
+        </figure>
+        <figure class="photo-card reveal">
+          <img src="assets/images/gallery/photo-3.svg" alt="Marcador de foto: nosotros" loading="lazy">
+          <figcaption><strong>Nosotros</strong><span>El álbum irá creciendo con cada nueva aventura.</span></figcaption>
+        </figure>
+      </div>
+      <div class="empty-cloud-gallery" id="emptyCloudGallery" hidden>No hay fotos online todavía. Cuando subas la primera, aparecerá aquí.</div>
+    </section>
+
+    <section class="section future-section" id="futuro">
+      <div class="future-card reveal">
+        <p class="eyebrow">Capítulo que todavía no existe</p>
+        <h2>Una lista de recuerdos pendientes</h2>
+        <div class="future-list">
+          <label><input type="checkbox"><span>Ver un atardecer juntos sin mirar el reloj.</span></label>
+          <label><input type="checkbox"><span>Hacer una foto que termine siendo nuestra favorita.</span></label>
+          <label><input type="checkbox"><span>Conocer un lugar nuevo y decir “tenemos que volver”.</span></label>
+          <label><input type="checkbox"><span>Tener una canción que nos recuerde exactamente a esta etapa.</span></label>
+          <label><input type="checkbox"><span>Celebrar una fecha que hoy todavía no sabemos que será importante.</span></label>
+        </div>
+        <p class="future-note">Los checks se guardan solo en este dispositivo. Es nuestra pequeña lista privada de pendientes.</p>
+      </div>
+    </section>
+
+    <section class="section final-section" id="final">
+      <div class="final-card reveal" id="secretCard">
+        <span class="final-heart" aria-hidden="true">♥</span>
+        <p class="eyebrow">Y si algún día vuelves a esta página…</p>
+        <h2>Quiero que recuerdes que todo esto empezó porque conocerte me pareció demasiado bonito como para dejarlo pasar.</h2>
+        <p>No sé cuántos capítulos tendrá nuestra historia, pero sí sé que este comienzo merece ser recordado.</p>
+        <button class="button button-primary" id="reopenLetterButton" type="button">Volver a leer mi carta ❤️</button>
+      </div>
+      <p class="footer-signature">Hecho con cariño para Madeline · David, 2026</p>
+    </section>
+  </main>
+
+  <dialog class="modal letter-modal" id="letterModal">
+    <div class="modal-backdrop" data-close-dialog></div>
+    <div class="letter-wrap">
+      <button class="modal-close" type="button" data-close-dialog aria-label="Cerrar carta">×</button>
+      <div class="envelope-large" id="largeEnvelope" aria-hidden="true">
+        <div class="envelope-flap"></div>
+        <div class="envelope-body"><span>♥</span></div>
+      </div>
+      <article class="letter-paper" id="letterPaper">
+        <p class="letter-kicker">Para Madeline</p>
+        <h2>Quería dejarte algo que pudieras volver a leer.</h2>
+        <p>Tal vez nuestra historia todavía esté empezando, pero desde el 12 de julio hay algo que cambió. Entre mensajes, conversaciones y pequeños detalles, empezaste a ocupar un lugar que antes no existía.</p>
+        <p>Y cuando llegó el 16 de agosto, todo se volvió un poco más real. Ya no eras solo una persona al otro lado de una pantalla. Eras tu mirada, tu voz, tu manera de estar ahí… y ese recuerdo que todavía me hace sonreír.</p>
+        <p>No quiero prometerte una historia perfecta. Prefiero prometerte algo más verdadero: intención, respeto, paciencia, detalles, conversaciones sinceras y ganas de construir momentos que algún día podamos mirar hacia atrás y decir: “qué bonito que elegimos vivir esto”.</p>
+        <p>Si me preguntas qué quiero contigo, la respuesta es simple: quiero seguir conociéndote. Quiero descubrir tus días buenos, acompañarte en los difíciles, reírme contigo por cosas que nadie más entendería y llenar esta página de fotos que todavía no hemos tomado.</p>
+        <p>Gracias por aparecer. Gracias por quedarte el tiempo suficiente para que quisiera hacerte un lugar así.</p>
+        <p class="letter-signoff">Con muchísimo cariño,<br><strong>David ❤️</strong></p>
+      </article>
+    </div>
+  </dialog>
+
+  <dialog class="modal message-modal" id="messageModal">
+    <div class="modal-backdrop" data-close-dialog></div>
+    <div class="message-card">
+      <button class="modal-close" type="button" data-close-dialog aria-label="Cerrar mensaje">×</button>
+      <span class="message-icon">✉</span>
+      <p id="openWhenMessage"></p>
+    </div>
+  </dialog>
+
+  <dialog class="modal upload-modal" id="uploadModal">
+    <div class="modal-backdrop" data-close-dialog></div>
+    <div class="upload-card">
+      <button class="modal-close" type="button" data-close-dialog aria-label="Cerrar">×</button>
+      <div id="uploadUnavailable" class="upload-state">
+        <span class="cloud-icon">☁</span>
+        <h2>Galería online todavía no conectada</h2>
+        <p>El proyecto ya viene preparado para Supabase. Sigue la guía del <strong>README.md</strong>, pega la URL y la clave pública en <code>js/config.js</code> y esta ventana se transformará automáticamente en el formulario de acceso y subida.</p>
+      </div>
+
+      <div id="authPanel" class="upload-state" hidden>
+        <p class="eyebrow">Acceso privado</p>
+        <h2>Entrar para subir recuerdos</h2>
+        <form id="loginForm" class="form-stack">
+          <label>Correo<input id="loginEmail" type="email" autocomplete="email" required></label>
+          <label>Contraseña<input id="loginPassword" type="password" autocomplete="current-password" required minlength="6"></label>
+          <button class="button button-primary" type="submit">Entrar</button>
+        </form>
+        <p class="form-message" id="loginMessage" aria-live="polite"></p>
+      </div>
+
+      <div id="uploadPanel" class="upload-state" hidden>
+        <div class="upload-heading-row">
+          <div><p class="eyebrow">Nuevo recuerdo</p><h2>Subir una foto</h2></div>
+          <button class="text-button" id="logoutButton" type="button">Cerrar sesión</button>
+        </div>
+        <form id="photoUploadForm" class="form-stack">
+          <label>Foto<input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required></label>
+          <div class="upload-preview" id="uploadPreview">Selecciona una imagen</div>
+          <label>Título<input id="photoTitle" type="text" maxlength="80" placeholder="Ej. Nuestra primera salida" required></label>
+          <label>Una frase<textarea id="photoCaption" maxlength="220" rows="3" placeholder="Algo que quieras recordar de ese momento..."></textarea></label>
+          <button class="button button-primary" id="uploadSubmitButton" type="submit">Guardar en nuestro álbum ☁️</button>
+        </form>
+        <p class="form-message" id="uploadMessage" aria-live="polite"></p>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <audio id="loveAudio" src="assets/audio/our-song.wav" loop preload="none"></audio>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

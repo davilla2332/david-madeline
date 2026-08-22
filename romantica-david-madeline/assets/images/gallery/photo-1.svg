@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5dce3"/><stop offset="1" stop-color="#e7c2cc"/></linearGradient></defs>
+<rect width="900" height="1200" fill="url(#g)"/>
+<circle cx="450" cy="470" r="210" fill="#fff" opacity=".3"/>
+<path d="M450 680C276 575 245 452 314 382c63-64 116-21 136 27 20-48 73-91 136-27 69 70 38 193-136 298Z" fill="#a94f6d" opacity=".78"/>
+<text x="450" y="930" text-anchor="middle" font-family="Georgia,serif" font-size="62" fill="#633647">Nuestra foto</text>
+<text x="450" y="995" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" letter-spacing="6" fill="#805565">DAVID + MADELINE</text>
+</svg>

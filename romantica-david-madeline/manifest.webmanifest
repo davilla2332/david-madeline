@@ -1,0 +1,11 @@
+{
+  "name": "David & Madeline — Nuestra historia",
+  "short_name": "D ♥ M",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fffaf8",
+  "theme_color": "#a94f6d",
+  "icons": [
+    { "src": "assets/images/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
