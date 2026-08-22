@@ -1,5 +1,7 @@
 import { APP_CONFIG, isSupabaseConfigured } from './config.js';
-import { getCloudState, login, logout, listPhotos, uploadPhoto } from './supabase-gallery.js';
+import { getCloudState, login, logout, listPhotos, uploadPhoto, updatePhoto, deletePhoto } from './supabase-gallery.js';
+import { listChapters, createChapter, updateChapter, deleteChapter } from './supabase-story.js';
+import { generateRomanticMessage } from './ai.js';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -7,6 +9,9 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const toast = $('#toast');
 let toastTimer = null;
+let currentSession = null;
+let chaptersCache = [];
+const photosById = new Map();
 
 function showToast(message) {
   toast.textContent = message;
@@ -164,11 +169,24 @@ const extraReasons = [
   'Porque quiero conocer todas esas versiones de ti que solo aparecen con el tiempo.'
 ];
 let lastReason = -1;
-$('#randomReasonButton').addEventListener('click', () => {
+$('#randomReasonButton').addEventListener('click', async () => {
+  const target = $('#randomReasonText');
+  if (currentSession) {
+    const previous = target.textContent;
+    target.textContent = 'Pensando en una razón nueva… ✨';
+    try {
+      target.textContent = await generateRomanticMessage({ type: 'reason', maxLength: 260 });
+      return;
+    } catch (error) {
+      console.warn('IA razón:', error);
+      target.textContent = previous;
+      showToast('La IA no respondió; usaré una razón guardada.');
+    }
+  }
   let next = Math.floor(Math.random() * extraReasons.length);
   if (extraReasons.length > 1 && next === lastReason) next = (next + 1) % extraReasons.length;
   lastReason = next;
-  $('#randomReasonText').textContent = extraReasons[next];
+  target.textContent = extraReasons[next];
 });
 
 // Memory jar
@@ -185,13 +203,25 @@ const jarMessages = [
   'Si encontraste este mensaje al azar, tómalo como una señal: te mando un abrazo enorme.'
 ];
 let jarIndex = -1;
-$('#jarButton').addEventListener('click', () => {
-  let next = Math.floor(Math.random() * jarMessages.length);
-  if (jarMessages.length > 1 && next === jarIndex) next = (next + 1) % jarMessages.length;
-  jarIndex = next;
+$('#jarButton').addEventListener('click', async () => {
+  let text = '';
+  if (currentSession) {
+    $('#jarMessage').innerHTML = '<p>Pensando en algo bonito para ti… ✨</p>';
+    try {
+      text = await generateRomanticMessage({ type: 'jar', maxLength: 340 });
+    } catch (error) {
+      console.warn('IA frasquito:', error);
+    }
+  }
+  if (!text) {
+    let next = Math.floor(Math.random() * jarMessages.length);
+    if (jarMessages.length > 1 && next === jarIndex) next = (next + 1) % jarMessages.length;
+    jarIndex = next;
+    text = jarMessages[next];
+  }
   $('#jarMessage').innerHTML = '';
   const p = document.createElement('p');
-  p.textContent = jarMessages[next];
+  p.textContent = text;
   $('#jarMessage').appendChild(p);
   if (!prefersReducedMotion) {
     $('#jarButton').animate([
@@ -203,9 +233,12 @@ $('#jarButton').addEventListener('click', () => {
 
 // Open when messages
 const messageModal = $('#messageModal');
+let currentOpenWhenSituation = '';
 $$('.mini-envelope').forEach((button) => {
   button.addEventListener('click', () => {
+    currentOpenWhenSituation = button.dataset.situation || button.textContent.trim();
     $('#openWhenMessage').textContent = button.dataset.message;
+    $('#aiOpenWhenNote').textContent = currentSession ? 'Puedes pedir un mensaje distinto cada vez.' : 'Inicia sesión para generar mensajes nuevos con IA.';
     messageModal.showModal();
   });
 });
@@ -294,7 +327,7 @@ function animateHearts() {
   }
 }
 
-// Cloud gallery
+// Cloud gallery + online administration
 const uploadModal = $('#uploadModal');
 const uploadUnavailable = $('#uploadUnavailable');
 const authPanel = $('#authPanel');
@@ -306,6 +339,19 @@ const photoUploadForm = $('#photoUploadForm');
 const photoInput = $('#photoInput');
 const uploadPreview = $('#uploadPreview');
 let previewUrl = null;
+let editPreviewUrl = null;
+
+function applyAdminState() {
+  const loggedIn = Boolean(currentSession);
+  $$('.photo-edit-button').forEach((button) => { button.hidden = !loggedIn; });
+  $$('.chapter-admin-actions').forEach((actions) => { actions.hidden = !loggedIn; });
+  $('#chapterStatus').textContent = loggedIn
+    ? 'Modo edición activo · puedes agregar, editar o eliminar capítulos.'
+    : 'Los capítulos son públicos; inicia sesión desde “Subir una foto” para administrarlos.';
+  $('#aiLetterNote').textContent = loggedIn
+    ? 'IA activa: puedes generar una versión distinta.'
+    : 'La IA requiere que hayas iniciado sesión.';
+}
 
 openUploadButton.addEventListener('click', async () => {
   uploadModal.showModal();
@@ -314,27 +360,34 @@ openUploadButton.addEventListener('click', async () => {
 
 async function refreshCloudUI() {
   if (!isSupabaseConfigured()) {
+    currentSession = null;
     uploadUnavailable.hidden = false;
     authPanel.hidden = true;
     uploadPanel.hidden = true;
     cloudStatus.classList.remove('online');
     cloudStatus.lastChild.textContent = 'Galería local activa';
+    applyAdminState();
     return;
   }
 
   try {
     const state = await getCloudState();
+    currentSession = state.session;
     uploadUnavailable.hidden = true;
     authPanel.hidden = Boolean(state.session);
     uploadPanel.hidden = !state.session;
     cloudStatus.classList.add('online');
-    cloudStatus.lastChild.textContent = 'Galería online conectada';
+    cloudStatus.lastChild.textContent = state.session ? 'Galería online · edición activa' : 'Galería online conectada';
+    applyAdminState();
+    renderChapters();
   } catch (error) {
+    currentSession = null;
     uploadUnavailable.hidden = false;
     authPanel.hidden = true;
     uploadPanel.hidden = true;
     uploadUnavailable.querySelector('h2').textContent = 'No se pudo conectar con la galería';
     uploadUnavailable.querySelector('p').textContent = error.message || 'Revisa la configuración de Supabase.';
+    applyAdminState();
   }
 }
 
@@ -347,7 +400,7 @@ loginForm.addEventListener('submit', async (event) => {
     message.textContent = '';
     loginForm.reset();
     await refreshCloudUI();
-    showToast('Acceso correcto ❤️');
+    showToast('Acceso correcto ❤️ Edición e IA activadas.');
   } catch (error) {
     message.textContent = error.message || 'No se pudo iniciar sesión.';
   }
@@ -378,22 +431,22 @@ photoInput.addEventListener('change', () => {
   uploadPreview.appendChild(img);
 });
 
+function validateImageFile(file) {
+  if (!file) return null;
+  if (!APP_CONFIG.upload.allowedTypes.includes(file.type)) return 'Formato no permitido. Usa JPG, PNG, WEBP o GIF.';
+  const maxBytes = APP_CONFIG.upload.maxFileSizeMB * 1024 * 1024;
+  if (file.size > maxBytes) return `La imagen supera ${APP_CONFIG.upload.maxFileSizeMB} MB.`;
+  return null;
+}
+
 photoUploadForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const message = $('#uploadMessage');
   const submitButton = $('#uploadSubmitButton');
   const file = photoInput.files?.[0];
   if (!file) return;
-
-  if (!APP_CONFIG.upload.allowedTypes.includes(file.type)) {
-    message.textContent = 'Formato no permitido. Usa JPG, PNG, WEBP o GIF.';
-    return;
-  }
-  const maxBytes = APP_CONFIG.upload.maxFileSizeMB * 1024 * 1024;
-  if (file.size > maxBytes) {
-    message.textContent = `La imagen supera ${APP_CONFIG.upload.maxFileSizeMB} MB.`;
-    return;
-  }
+  const validation = validateImageFile(file);
+  if (validation) { message.textContent = validation; return; }
 
   submitButton.disabled = true;
   message.textContent = 'Guardando este recuerdo en la nube…';
@@ -419,8 +472,13 @@ photoUploadForm.addEventListener('submit', async (event) => {
 });
 
 function addCloudPhotoCard(photo, prepend = false) {
+  photosById.set(photo.id, photo);
+  const existing = document.querySelector(`.cloud-photo-card[data-photo-id="${photo.id}"]`);
+  if (existing) existing.remove();
+
   const figure = document.createElement('figure');
   figure.className = 'photo-card cloud-photo-card visible';
+  figure.dataset.photoId = photo.id;
   const img = document.createElement('img');
   img.src = photo.public_url;
   img.alt = photo.title || 'Recuerdo de David y Madeline';
@@ -431,7 +489,15 @@ function addCloudPhotoCard(photo, prepend = false) {
   const span = document.createElement('span');
   span.textContent = photo.caption || 'Guardado en nuestro álbum online.';
   caption.append(strong, span);
-  figure.append(img, caption);
+
+  const editButton = document.createElement('button');
+  editButton.type = 'button';
+  editButton.className = 'photo-edit-button';
+  editButton.textContent = 'Editar ✎';
+  editButton.hidden = !currentSession;
+  editButton.addEventListener('click', () => openPhotoEditor(photo.id));
+
+  figure.append(img, caption, editButton);
   const grid = $('#photoGrid');
   if (prepend) grid.prepend(figure);
   else grid.append(figure);
@@ -441,10 +507,12 @@ async function loadCloudPhotos() {
   if (!isSupabaseConfigured()) return;
   try {
     const photos = await listPhotos();
+    photosById.clear();
+    $$('.cloud-photo-card').forEach((card) => card.remove());
     photos.forEach((photo) => addCloudPhotoCard(photo));
     cloudStatus.classList.add('online');
     cloudStatus.lastChild.textContent = 'Galería online conectada';
-    $('#emptyCloudGallery').hidden = true;
+    $('#emptyCloudGallery').hidden = photos.length !== 0;
   } catch (error) {
     console.warn('Galería online:', error);
     cloudStatus.classList.remove('online');
@@ -452,5 +520,242 @@ async function loadCloudPhotos() {
   }
 }
 
-loadCloudPhotos();
-refreshCloudUI();
+// Photo editor
+const editPhotoModal = $('#editPhotoModal');
+const editPhotoFile = $('#editPhotoFile');
+function openPhotoEditor(id) {
+  const photo = photosById.get(id);
+  if (!photo || !currentSession) return;
+  $('#editPhotoId').value = photo.id;
+  $('#editPhotoStoragePath').value = photo.storage_path || '';
+  $('#editPhotoTitle').value = photo.title || '';
+  $('#editPhotoCaption').value = photo.caption || '';
+  $('#editPhotoMessage').textContent = '';
+  editPhotoFile.value = '';
+  $('#editPhotoPreview').innerHTML = `<img src="${photo.public_url}" alt="Vista previa">`;
+  editPhotoModal.showModal();
+}
+
+editPhotoFile.addEventListener('change', () => {
+  const file = editPhotoFile.files?.[0];
+  if (!file) return;
+  const validation = validateImageFile(file);
+  if (validation) { $('#editPhotoMessage').textContent = validation; return; }
+  if (editPreviewUrl) URL.revokeObjectURL(editPreviewUrl);
+  editPreviewUrl = URL.createObjectURL(file);
+  $('#editPhotoPreview').innerHTML = `<img src="${editPreviewUrl}" alt="Nueva vista previa">`;
+});
+
+$('#photoEditForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const button = $('#savePhotoEditButton');
+  const message = $('#editPhotoMessage');
+  const replacementFile = editPhotoFile.files?.[0] || null;
+  const validation = validateImageFile(replacementFile);
+  if (validation) { message.textContent = validation; return; }
+  button.disabled = true;
+  message.textContent = 'Guardando cambios…';
+  try {
+    const photo = await updatePhoto({
+      id: $('#editPhotoId').value,
+      oldStoragePath: $('#editPhotoStoragePath').value,
+      title: $('#editPhotoTitle').value,
+      caption: $('#editPhotoCaption').value,
+      replacementFile
+    });
+    addCloudPhotoCard(photo, true);
+    closeDialog(editPhotoModal);
+    showToast('Foto actualizada ❤️');
+  } catch (error) {
+    message.textContent = error.message || 'No se pudo editar la foto.';
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$('#deletePhotoButton').addEventListener('click', async () => {
+  const id = $('#editPhotoId').value;
+  const photo = photosById.get(id);
+  if (!photo || !confirm('¿Quieres eliminar esta foto del álbum? Esta acción no se puede deshacer.')) return;
+  const message = $('#editPhotoMessage');
+  message.textContent = 'Eliminando…';
+  try {
+    await deletePhoto({ id, storagePath: photo.storage_path });
+    photosById.delete(id);
+    document.querySelector(`.cloud-photo-card[data-photo-id="${id}"]`)?.remove();
+    closeDialog(editPhotoModal);
+    showToast('Foto eliminada del álbum.');
+  } catch (error) {
+    message.textContent = error.message || 'No se pudo eliminar la foto.';
+  }
+});
+
+// Chapters
+const chapterModal = $('#chapterModal');
+function formatChapterDate(value) {
+  if (!value) return '';
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return new Intl.DateTimeFormat('es-PA', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date);
+}
+
+function renderChapters() {
+  const grid = $('#chapterGrid');
+  grid.innerHTML = '';
+  $('#emptyChapters').hidden = chaptersCache.length > 0;
+  chaptersCache.forEach((chapter, index) => {
+    const card = document.createElement('article');
+    card.className = 'chapter-card visible';
+    card.dataset.chapterId = chapter.id;
+    const meta = document.createElement('div');
+    meta.className = 'chapter-meta';
+    meta.innerHTML = `<span class="chapter-emoji">${chapter.emoji || '❤'}</span><span>Capítulo ${String(index + 2).padStart(2, '0')} · ${formatChapterDate(chapter.story_date)}</span>`;
+    const title = document.createElement('h3');
+    title.textContent = chapter.title;
+    const body = document.createElement('p');
+    body.textContent = chapter.body;
+    const actions = document.createElement('div');
+    actions.className = 'chapter-admin-actions';
+    actions.hidden = !currentSession;
+    const edit = document.createElement('button');
+    edit.type = 'button';
+    edit.className = 'text-button';
+    edit.textContent = 'Editar capítulo';
+    edit.addEventListener('click', () => openChapterEditor(chapter.id));
+    actions.appendChild(edit);
+    card.append(meta, title, body, actions);
+    grid.appendChild(card);
+  });
+}
+
+async function loadChapters() {
+  if (!isSupabaseConfigured()) return;
+  try {
+    chaptersCache = await listChapters();
+    renderChapters();
+  } catch (error) {
+    console.warn('Capítulos:', error);
+    $('#chapterStatus').textContent = 'No se pudieron cargar los capítulos online.';
+  }
+}
+
+function openChapterEditor(id = null) {
+  if (!currentSession) {
+    uploadModal.showModal();
+    refreshCloudUI();
+    showToast('Inicia sesión para agregar capítulos.');
+    return;
+  }
+  const chapter = id ? chaptersCache.find((item) => item.id === id) : null;
+  $('#chapterId').value = chapter?.id || '';
+  $('#chapterDate').value = chapter?.story_date || new Date().toISOString().slice(0, 10);
+  $('#chapterEmoji').value = chapter?.emoji || '❤';
+  $('#chapterTitle').value = chapter?.title || '';
+  $('#chapterBody').value = chapter?.body || '';
+  $('#chapterModalTitle').textContent = chapter ? 'Editar capítulo' : 'Agregar capítulo';
+  $('#deleteChapterButton').hidden = !chapter;
+  $('#chapterMessage').textContent = '';
+  chapterModal.showModal();
+}
+
+$('#addChapterButton').addEventListener('click', () => openChapterEditor());
+
+$('#chapterForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const id = $('#chapterId').value;
+  const button = $('#saveChapterButton');
+  const message = $('#chapterMessage');
+  const payload = {
+    title: $('#chapterTitle').value,
+    storyDate: $('#chapterDate').value,
+    body: $('#chapterBody').value,
+    emoji: $('#chapterEmoji').value
+  };
+  button.disabled = true;
+  message.textContent = 'Guardando capítulo…';
+  try {
+    if (id) await updateChapter({ id, ...payload });
+    else await createChapter(payload);
+    chaptersCache = await listChapters();
+    renderChapters();
+    closeDialog(chapterModal);
+    launchHearts(35);
+    showToast(id ? 'Capítulo actualizado ❤️' : 'Nuevo capítulo agregado ❤️');
+  } catch (error) {
+    message.textContent = error.message || 'No se pudo guardar el capítulo.';
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$('#deleteChapterButton').addEventListener('click', async () => {
+  const id = $('#chapterId').value;
+  if (!id || !confirm('¿Quieres eliminar este capítulo?')) return;
+  const message = $('#chapterMessage');
+  message.textContent = 'Eliminando capítulo…';
+  try {
+    await deleteChapter(id);
+    chaptersCache = chaptersCache.filter((item) => item.id !== id);
+    renderChapters();
+    closeDialog(chapterModal);
+    showToast('Capítulo eliminado.');
+  } catch (error) {
+    message.textContent = error.message || 'No se pudo eliminar el capítulo.';
+  }
+});
+
+// AI helpers
+$('#aiChapterButton').addEventListener('click', async () => {
+  const message = $('#chapterMessage');
+  const notes = $('#chapterBody').value.trim();
+  const context = `Título: ${$('#chapterTitle').value || 'sin título'}. Fecha: ${$('#chapterDate').value || 'sin fecha'}. Notas: ${notes || 'Escribe un recuerdo romántico breve para este capítulo.'}`;
+  message.textContent = 'La IA está ayudando a escribir este capítulo… ✨';
+  try {
+    $('#chapterBody').value = await generateRomanticMessage({ type: 'chapter', context, maxLength: 1200 });
+    message.textContent = 'Texto generado. Puedes editarlo antes de guardar.';
+  } catch (error) {
+    message.textContent = error.message || 'No se pudo usar la IA.';
+  }
+});
+
+$('#aiOpenWhenButton').addEventListener('click', async () => {
+  const note = $('#aiOpenWhenNote');
+  if (!currentSession) {
+    note.textContent = 'Inicia sesión desde la galería para activar la IA.';
+    return;
+  }
+  note.textContent = 'Creando un mensaje nuevo… ✨';
+  try {
+    $('#openWhenMessage').textContent = await generateRomanticMessage({ type: 'open_when', context: currentOpenWhenSituation, maxLength: 600 });
+    note.textContent = 'Mensaje nuevo generado con IA.';
+  } catch (error) {
+    note.textContent = error.message || 'No se pudo generar otro mensaje.';
+  }
+});
+
+$('#aiLetterButton').addEventListener('click', async () => {
+  const note = $('#aiLetterNote');
+  if (!currentSession) {
+    note.textContent = 'Inicia sesión desde la galería para activar la IA.';
+    return;
+  }
+  note.textContent = 'Escribiendo una nueva carta… ✨';
+  try {
+    const text = await generateRomanticMessage({ type: 'letter', maxLength: 1500 });
+    let result = $('#aiLetterResult');
+    if (!result) {
+      result = document.createElement('p');
+      result.id = 'aiLetterResult';
+      result.className = 'ai-letter-result';
+      $('#aiLetterButton').before(result);
+    }
+    result.textContent = text;
+    note.textContent = 'Nueva carta generada. Cada vez puede ser diferente.';
+  } catch (error) {
+    note.textContent = error.message || 'No se pudo crear la carta.';
+  }
+});
+
+await refreshCloudUI();
+await Promise.all([loadCloudPhotos(), loadChapters()]);
+applyAdminState();

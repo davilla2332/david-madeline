@@ -1,0 +1,14 @@
+DAVID & MADELINE — ACTUALIZACIÓN V2 SIN PERDER TU CONEXIÓN
+
+Como tu web ya está conectada a Supabase:
+
+1. CONSERVA tu archivo actual js/config.js (ahí están tu Project URL y publishable/anon key).
+2. Reemplaza los demás archivos incluidos en el paquete ACTUALIZACION_V2.
+3. En Supabase > SQL Editor ejecuta una vez: supabase/upgrade-v2.sql
+4. Configura OPENAI_API_KEY como secreto de Supabase Edge Functions.
+5. Despliega la función supabase/functions/romantic-ai.
+6. Haz commit/push a GitHub y espera la actualización de GitHub Pages.
+
+IMPORTANTE:
+- El código V2 usa story_chapters y romantic-ai como valores por defecto, por lo que NO necesitas modificar tu config.js actual.
+- Nunca copies OPENAI_API_KEY dentro de GitHub, index.html o js/config.js.

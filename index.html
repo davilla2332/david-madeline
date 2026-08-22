@@ -99,6 +99,20 @@
       </div>
     </section>
 
+    <section class="section chapters-section" id="capitulos">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Nuestra historia sigue creciendo</p>
+        <h2>Más capítulos, escritos por nosotros</h2>
+        <p>Cada nuevo recuerdo puede convertirse en un capítulo. Se guarda online en Supabase y aparece aquí automáticamente para los dos.</p>
+      </div>
+      <div class="chapter-toolbar reveal">
+        <div class="chapter-status" id="chapterStatus">Los capítulos online aparecerán aquí.</div>
+        <button class="button button-soft" id="addChapterButton" type="button">Agregar capítulo ＋</button>
+      </div>
+      <div class="chapter-grid" id="chapterGrid"></div>
+      <div class="empty-chapters" id="emptyChapters">Todavía no hay capítulos adicionales. El siguiente recuerdo puede empezar aquí. ❤️</div>
+    </section>
+
     <section class="section counter-section">
       <div class="counter-shell reveal">
         <div>
@@ -155,10 +169,10 @@
         <h2>Un pequeño abrazo en forma de palabras</h2>
       </div>
       <div class="envelope-grid">
-        <button class="mini-envelope reveal" type="button" data-message="Si tu día estuvo pesado, recuerda que no tienes que ser fuerte todo el tiempo. Aquí tienes un lugar donde puedes descansar, hablar y simplemente ser tú."><span>✉</span><b>…tengas un día difícil</b></button>
-        <button class="mini-envelope reveal" type="button" data-message="Si me extrañas, piensa que en algún lugar yo también estoy recordando una conversación, una sonrisa o un momento contigo. La distancia nunca borra lo que importa."><span>✉</span><b>…me extrañes</b></button>
-        <button class="mini-envelope reveal" type="button" data-message="Quiero que recuerdes esto: eres más capaz de lo que a veces crees, y mereces celebrar cada paso que das, incluso los que nadie más ve."><span>✉</span><b>…dudes de ti</b></button>
-        <button class="mini-envelope reveal" type="button" data-message="Imagínanos riéndonos de alguna tontería, inventando un plan de último minuto y convirtiendo un día cualquiera en un recuerdo. Todavía nos faltan muchos de esos."><span>✉</span><b>…quieras sonreír</b></button>
+        <button class="mini-envelope reveal" type="button" data-situation="tengas un día difícil" data-message="Si tu día estuvo pesado, recuerda que no tienes que ser fuerte todo el tiempo. Aquí tienes un lugar donde puedes descansar, hablar y simplemente ser tú."><span>✉</span><b>…tengas un día difícil</b></button>
+        <button class="mini-envelope reveal" type="button" data-situation="me extrañes" data-message="Si me extrañas, piensa que en algún lugar yo también estoy recordando una conversación, una sonrisa o un momento contigo. La distancia nunca borra lo que importa."><span>✉</span><b>…me extrañes</b></button>
+        <button class="mini-envelope reveal" type="button" data-situation="dudes de ti" data-message="Quiero que recuerdes esto: eres más capaz de lo que a veces crees, y mereces celebrar cada paso que das, incluso los que nadie más ve."><span>✉</span><b>…dudes de ti</b></button>
+        <button class="mini-envelope reveal" type="button" data-situation="quieras sonreír" data-message="Imagínanos riéndonos de alguna tontería, inventando un plan de último minuto y convirtiendo un día cualquiera en un recuerdo. Todavía nos faltan muchos de esos."><span>✉</span><b>…quieras sonreír</b></button>
       </div>
     </section>
 
@@ -166,12 +180,14 @@
       <div class="section-heading reveal">
         <p class="eyebrow">Nuestro álbum</p>
         <h2>Un lugar para guardar lo que no queremos olvidar</h2>
-        <p>Las primeras tarjetas son de ejemplo. Cuando conectes Supabase, las fotos que suban desde esta misma página aparecerán aquí automáticamente.</p>
+        <p>Las fotos online pueden administrarse desde aquí: cambiar título o frase, reemplazar la imagen y eliminar recuerdos cuando hayas iniciado sesión.</p>
       </div>
 
       <div class="gallery-toolbar reveal">
         <div class="gallery-status" id="cloudStatus"><span class="status-dot"></span>Galería local activa</div>
-        <button class="button button-soft" id="openUploadButton" type="button">Subir una foto ☁️</button>
+        <div class="gallery-actions">
+          <button class="button button-soft" id="openUploadButton" type="button">Subir una foto ☁️</button>
+        </div>
       </div>
 
       <div class="photo-grid" id="photoGrid">
@@ -235,6 +251,8 @@
         <p>Si me preguntas qué quiero contigo, la respuesta es simple: quiero seguir conociéndote. Quiero descubrir tus días buenos, acompañarte en los difíciles, reírme contigo por cosas que nadie más entendería y llenar esta página de fotos que todavía no hemos tomado.</p>
         <p>Gracias por aparecer. Gracias por quedarte el tiempo suficiente para que quisiera hacerte un lugar así.</p>
         <p class="letter-signoff">Con muchísimo cariño,<br><strong>David ❤️</strong></p>
+        <button class="button button-soft ai-letter-button" id="aiLetterButton" type="button">Crear otra carta con IA ✨</button>
+        <p class="ai-note" id="aiLetterNote">La IA requiere que hayas iniciado sesión.</p>
       </article>
     </div>
   </dialog>
@@ -245,6 +263,8 @@
       <button class="modal-close" type="button" data-close-dialog aria-label="Cerrar mensaje">×</button>
       <span class="message-icon">✉</span>
       <p id="openWhenMessage"></p>
+      <button class="button button-soft ai-message-button" id="aiOpenWhenButton" type="button">Otro mensaje con IA ✨</button>
+      <p class="ai-note" id="aiOpenWhenNote"></p>
     </div>
   </dialog>
 
@@ -283,6 +303,52 @@
         </form>
         <p class="form-message" id="uploadMessage" aria-live="polite"></p>
       </div>
+    </div>
+  </dialog>
+
+  <dialog class="modal edit-photo-modal" id="editPhotoModal">
+    <div class="modal-backdrop" data-close-dialog></div>
+    <div class="upload-card">
+      <button class="modal-close" type="button" data-close-dialog aria-label="Cerrar">×</button>
+      <p class="eyebrow">Editar recuerdo</p>
+      <h2 class="modal-title">Cambiar esta foto</h2>
+      <form id="photoEditForm" class="form-stack">
+        <input id="editPhotoId" type="hidden">
+        <input id="editPhotoStoragePath" type="hidden">
+        <div class="upload-preview" id="editPhotoPreview"></div>
+        <label>Título<input id="editPhotoTitle" type="text" maxlength="80" required></label>
+        <label>Frase<textarea id="editPhotoCaption" maxlength="220" rows="3"></textarea></label>
+        <label>Reemplazar imagen (opcional)<input id="editPhotoFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label>
+        <div class="modal-actions">
+          <button class="button button-primary" id="savePhotoEditButton" type="submit">Guardar cambios</button>
+          <button class="button danger-button" id="deletePhotoButton" type="button">Eliminar foto</button>
+        </div>
+      </form>
+      <p class="form-message" id="editPhotoMessage" aria-live="polite"></p>
+    </div>
+  </dialog>
+
+  <dialog class="modal chapter-modal" id="chapterModal">
+    <div class="modal-backdrop" data-close-dialog></div>
+    <div class="upload-card">
+      <button class="modal-close" type="button" data-close-dialog aria-label="Cerrar">×</button>
+      <p class="eyebrow">Nuestra historia</p>
+      <h2 class="modal-title" id="chapterModalTitle">Agregar capítulo</h2>
+      <form id="chapterForm" class="form-stack">
+        <input id="chapterId" type="hidden">
+        <div class="chapter-form-row">
+          <label>Fecha<input id="chapterDate" type="date" required></label>
+          <label>Emoji<input id="chapterEmoji" type="text" maxlength="8" value="❤" required></label>
+        </div>
+        <label>Título<input id="chapterTitle" type="text" maxlength="100" placeholder="Ej. Nuestra primera salida" required></label>
+        <label>Qué pasó / notas<textarea id="chapterBody" maxlength="3000" rows="7" placeholder="Cuéntalo con tus palabras..." required></textarea></label>
+        <button class="button button-soft" id="aiChapterButton" type="button">Ayúdame a escribirlo con IA ✨</button>
+        <div class="modal-actions">
+          <button class="button button-primary" id="saveChapterButton" type="submit">Guardar capítulo</button>
+          <button class="button danger-button" id="deleteChapterButton" type="button" hidden>Eliminar capítulo</button>
+        </div>
+      </form>
+      <p class="form-message" id="chapterMessage" aria-live="polite"></p>
     </div>
   </dialog>
 
