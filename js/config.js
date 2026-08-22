@@ -12,7 +12,8 @@ export const APP_CONFIG = {
     url: 'https://onhcxswrmvrzkcpqqxpf.supabase.co',
     anonKey: 'sb_publishable_sz2kZHK2RXxNkf0ePfXMFQ_Un9O5jqy',
     bucket: 'couple-photos',
-    table: 'couple_photos'
+    table: 'couple_photos',
+    aiFunction: 'romantic-ai'
   },
 
   upload: {
