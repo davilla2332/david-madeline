@@ -1,0 +1,18 @@
+DAVID & MADELINE ❤️ — INICIO RÁPIDO
+
+1) PRUEBA LOCAL
+   Abre la carpeta con VS Code + Live Server
+   o ejecuta: python -m http.server 8000
+
+2) GITHUB PAGES
+   Sube todo a la rama main del repositorio.
+   Settings > Pages > Deploy from a branch > main > / (root)
+
+3) FOTOS ONLINE (OPCIONAL)
+   - Crea un proyecto en Supabase.
+   - Ejecuta supabase/setup.sql en SQL Editor.
+   - Crea manualmente las cuentas que podrán subir fotos.
+   - Copia Project URL + publishable/anon key en js/config.js.
+   - Haz commit/push del cambio.
+
+Lee README.md para la explicación completa y las recomendaciones de seguridad.
